@@ -1,41 +1,33 @@
 from flask import Flask, request, jsonify
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from flask_smorest import Api
+
 from db import db
-from models import UserModel
+from resources.user import blp as UserBlueprint
 
-# def create_app():
-app = Flask(__name__)
+def create_app(db_url=None):
+    app = Flask(__name__)
 
-app.config["SQLALCHEMY_DATABASE_URI"]="sqlite:///data.db"
-db.init_app(app)
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    app.config["API_TITLE"] = "Stores REST API"
+    app.config["API_VERSION"] = "v1"
+    app.config["OPENAPI_VERSION"] = "3.0.3"
+    app.config["OPENAPI_URL_PREFIX"] = "/"
+    app.config["OPENAPI_SWAGGER_UI_PATH"] = "/swagger-ui"
+    app.config[
+        "OPENAPI_SWAGGER_UI_URL"
+    ] = "https://cdn.jsdelivr.net/npm/swagger-ui-dist/"
 
-with app.app_context():
-    db.create_all()
+    app.config["SQLALCHEMY_DATABASE_URI"]=db_url or "sqlite:///data.db"
+    db.init_app(app)
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    app.config["PROPAGATE_EXCEPTIONS"] = True
 
-# def create_app()
-@app.post('/register')
-def reg():
-    data = request.get_json()
-    # return f"{data['id']}, {data['email']},{data['username']}"
-    # nUser = {
-    #     "username": data["username"],
-    #     "mail": data["mail"],
-    #     "id": data["id"] 
-    # }
-    try:
-        newUser = UserModel(id=data['id'], email=data['email'],username=data['username'],)
 
-        db.session.add(newUser)
-        db.session.commit()
-        return jsonify(newUser)
-    except Exception as e:
-        print(e)
-        return jsonify(e)
 
-@app.get('/users')
-def get_users():
-    return "not implemented "
-    # return UserModel.query.all()
-    # return app
+    # db.init_app(app)
+    api = Api(app)
+
+    with app.app_context():
+        db.create_all()
+    api.register_blueprint(UserBlueprint)
+
+    return app
