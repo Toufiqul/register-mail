@@ -14,7 +14,7 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 with app.app_context():
     db.create_all()
 
-
+# def create_app()
 @app.post('/register')
 def reg():
     data = request.get_json()
