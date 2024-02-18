@@ -23,3 +23,5 @@ docker build -t register-mail .
 docker run -p 5000:5000 -w /app -v "$(pwd):/app" register-mail
 
 ```
+
+var.py file at "resources/var.py"
