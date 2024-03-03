@@ -6,6 +6,11 @@ from db import db
 from models import UserModel
 from schemas import UserSchema
 
+from redis import Redis
+from rq import Queue
+
+q = Queue(connection=Redis())
+
 from resources.sendMail import send_mail
 blp = Blueprint("Users", "users", description="Operations on users")
 
@@ -24,7 +29,11 @@ class UserList(MethodView):
             db.session.add(user)
             db.session.commit()
             send_mail(email_receiver)
+            job = q.enqueue(send_mail, email_receiver)
+            print(job.result())
         except SQLAlchemyError:
             abort(500, message="An error occurred while inserting the user.")
+        except Exception as e:
+            print(e)
 
         return user
