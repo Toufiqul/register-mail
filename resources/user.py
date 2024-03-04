@@ -1,7 +1,7 @@
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 from sqlalchemy.exc import SQLAlchemyError
-
+from flask import current_app
 from db import db
 from models import UserModel
 from schemas import UserSchema
@@ -29,8 +29,9 @@ class UserList(MethodView):
             db.session.add(user)
             db.session.commit()
             send_mail(email_receiver)
-            job = q.enqueue(send_mail, email_receiver)
-            print(job.result())
+            job = current_app.email_queue.enqueue(send_mail, email_receiver)
+            # print(job.result())
+            return {"message": f"Registration Successful! {job}"}, 200
         except SQLAlchemyError:
             abort(500, message="An error occurred while inserting the user.")
         except Exception as e:

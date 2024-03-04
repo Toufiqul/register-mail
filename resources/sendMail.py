@@ -5,9 +5,9 @@ from validate_email import validate_email
 
 email_sender = "fahim.prime@gmail.com"
 email_password = "mjai hixe ejho woju"
-subject = "reg mail test"
+subject = "Registration Confirmation"
 body = """
-test from reg mail
+Congratulations! You have been successfully registered.
 """
 def send_mail(receiver):
     em = EmailMessage()
