@@ -7,3 +7,4 @@ flask-sqlalchemy
 redis
 rq
 py3-validate-email
+bcrypt

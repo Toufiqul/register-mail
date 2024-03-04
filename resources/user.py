@@ -5,6 +5,8 @@ from flask import current_app
 from db import db
 from models import UserModel
 from schemas import UserSchema
+import bcrypt
+
 
 from redis import Redis
 from rq import Queue
@@ -23,15 +25,26 @@ class UserList(MethodView):
     @blp.arguments(UserSchema)
     @blp.response(201, UserSchema)
     def post(self, user_data):
-        user = UserModel(**user_data)
+        # print(user_data["username"])
+        # print(user_data["first_name"])
+        # print(user_data["second_name"])
+        # print(user_data["password"])
+        salt = bcrypt.gensalt()
+        user = UserModel(
+        username=user_data["username"],
+        email=user_data["email"],
+        password=bcrypt.hashpw(user_data["password"].encode('utf-8'), salt),
+        first_name=user_data.get("first_name"),
+        last_name=user_data.get("last_name")
+    )
         email_receiver = user_data["email"]
         try:
             db.session.add(user)
             db.session.commit()
-            # send_mail(email_receiver)
-            job = current_app.email_queue.enqueue(send_mail, email_receiver)
-            # print(job.result())
-            return {"message": f"Registration Successful! {job}"}, 200
+
+            # job = current_app.email_queue.enqueue(send_mail, email_receiver)
+
+            # return {"message": f"Registration Successful! {job}"}, 200
         except SQLAlchemyError:
             abort(500, message="An error occurred while inserting the user.")
         except Exception as e:
