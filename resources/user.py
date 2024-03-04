@@ -28,7 +28,7 @@ class UserList(MethodView):
         try:
             db.session.add(user)
             db.session.commit()
-            send_mail(email_receiver)
+            # send_mail(email_receiver)
             job = current_app.email_queue.enqueue(send_mail, email_receiver)
             # print(job.result())
             return {"message": f"Registration Successful! {job}"}, 200

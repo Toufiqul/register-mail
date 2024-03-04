@@ -1,12 +1,35 @@
+# docker-compose.yaml
 version: '3.8'
 
 services:
+  # The backend service uses an image that's built from the Dockerfile in the current directory
+  api:
+    # Specifying the build property, docker-compose.yml will look for a Dockerfile in that directory (where the "docker-compose.yml" file is located) and use it to build the image.
+    build: "."
+    
+    image: intern-backend-api-task
 
-  web:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    container_name: api_container
+
     ports:
-      - "5000:5000"
+      - 5000:5000
+
     volumes:
-      - .:/app  # Mount the current directory on the host to /app in the container
+      # - ./instance/sampledata.sqlite3:/app/instance/sampledata.sqlite3
+      - "/home/kevo/Documents/register-mail:/app"
+
+    command: sh -c "flask run --host 0.0.0.0"
+
+
+  rq_workers:
+
+    image: intern-backend-api-task
+
+    container_name: rq_workers_container
+
+    command: sh -c "rq worker --with-scheduler -u rediss://red-cnijnk0l6cac7398rl1g:OySRwc8iMtMerm6gACQasLf2IeML9Pc3@oregon-redis.render.com:6379 emails"
+
+    working_dir: /app
+
+    depends_on:
+      - api
