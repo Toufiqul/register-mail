@@ -15,7 +15,7 @@ from rq import Queue
 
 q = Queue(connection=Redis())
 
-from resources.sendMail import send_mail
+from resources.sendMail import gmail_send_message
 blp = Blueprint("Users", "users", description="Operations on users")
 
 @blp.route("/register")
@@ -42,14 +42,14 @@ class UserList(MethodView):
 
         email_receiver = user_data["email"]
         try:
-            db.session.add(user)
-            db.session.commit()
+            # db.session.add(user)
+            # db.session.commit()
 
-            # job = current_app.email_queue.enqueue(send_mail, email_receiver)
+            job = current_app.email_queue.enqueue(gmail_send_message, email_receiver)
 
-            # return {"message": f"Registration Successful! {job}"}, 200
-        except SQLAlchemyError:
-            abort(500, message="An error occurred while inserting the user.")
+            return {"message": f"Registration Successful! {job}"}, 200
+        # except SQLAlchemyError:
+        #     abort(500, message="An error occurred while inserting the user.")
         except Exception as e:
             print(e)
 
