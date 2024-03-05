@@ -5,7 +5,9 @@ from flask import current_app
 from db import db
 from models import UserModel
 from schemas import UserSchema
-import bcrypt
+import bcrypt #for hashing the password
+
+from validate_email import validate_email #to validate the email
 
 
 from redis import Redis
@@ -25,18 +27,19 @@ class UserList(MethodView):
     @blp.arguments(UserSchema)
     @blp.response(201, UserSchema)
     def post(self, user_data):
-        # print(user_data["username"])
-        # print(user_data["first_name"])
-        # print(user_data["second_name"])
-        # print(user_data["password"])
         salt = bcrypt.gensalt()
         user = UserModel(
         username=user_data["username"],
         email=user_data["email"],
-        password=bcrypt.hashpw(user_data["password"].encode('utf-8'), salt),
+        password=bcrypt.hashpw(user_data["password"].encode('utf-8'), salt), #salting and hashing the password
         first_name=user_data.get("first_name"),
         last_name=user_data.get("last_name")
     )
+        isValid = validate_email(email_address=user_data["email"])
+        if not isValid:
+            abort(400, message="Invalid email address. Please enter a valid email address")
+            # 400 bad request: The request could not be understood by the server due to incorrect syntax. The client SHOULD NOT repeat the request without modifications.
+
         email_receiver = user_data["email"]
         try:
             db.session.add(user)

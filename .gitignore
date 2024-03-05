@@ -1,2 +1,4 @@
 .venv
 creds.txt
+credentials.json
+token.json
