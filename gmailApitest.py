@@ -1,5 +1,12 @@
 import os.path
 
+import base64
+from email.message import EmailMessage
+
+import google.auth
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
+
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -7,14 +14,18 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 # If modifying these scopes, delete the file token.json.
-SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
+SCOPES = ["https://www.googleapis.com/auth/gmail.compose"]
 
+def gmail_send_message():
+  """Create and send an email message
+  Print the returned  message id
+  Returns: Message object, including message id
 
-def main():
-  """Shows basic usage of the Gmail API.
-  Lists the user's Gmail labels.
+  Load pre-authorized user credentials from the environment.
+  TODO(developer) - See https://developers.google.com/identity
+  for guides on implementing OAuth2 for the application.
   """
-  creds = None
+  creds= None
   # The file token.json stores the user's access and refresh tokens, and is
   # created automatically when the authorization flow completes for the first
   # time.
@@ -33,23 +44,34 @@ def main():
     with open("token.json", "w") as token:
       token.write(creds.to_json())
 
+
   try:
-    # Call the Gmail API
     service = build("gmail", "v1", credentials=creds)
-    results = service.users().labels().list(userId="me").execute()
-    labels = results.get("labels", [])
+    message = EmailMessage()
 
-    if not labels:
-      print("No labels found.")
-      return
-    print("Labels:")
-    for label in labels:
-      print(label["name"])
+    message.set_content("This is automated draft mail")
 
+    message["To"] = "kevo.kobayashi@gmail.com"
+    message["From"] = "fahim.prime@gmail.com"
+    message["Subject"] = "Automated draft"
+
+    # encoded message
+    encoded_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
+
+    create_message = {"raw": encoded_message}
+    # pylint: disable=E1101
+    send_message = (
+        service.users()
+        .messages()
+        .send(userId="me", body=create_message)
+        .execute()
+    )
+    print(f'Message Id: {send_message["id"]}')
   except HttpError as error:
-    # TODO(developer) - Handle errors from gmail API.
     print(f"An error occurred: {error}")
+    send_message = None
+  return send_message
 
 
 if __name__ == "__main__":
-  main()
+  gmail_send_message()
