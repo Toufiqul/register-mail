@@ -49,11 +49,11 @@ def gmail_send_message(receiver):
     service = build("gmail", "v1", credentials=creds)
     message = EmailMessage()
 
-    message.set_content("This is automated draft mail")
+    message.set_content("Congratulations! You have been successfully registered")
 
     message["To"] = receiver
     message["From"] = "fahim.prime@gmail.com"
-    message["Subject"] = "Automated draft"
+    message["Subject"] = "Register mail"
 
     # encoded message
     encoded_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
