@@ -7,6 +7,7 @@ Tech stack:
 - SQLite
 - SQLAlchemy
 - Gmail API
+- Gunicorn server for deployment
 
 #### to run
 

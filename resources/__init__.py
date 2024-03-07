@@ -1,0 +1,1 @@
+from resources.sendMail import gmail_send_message
