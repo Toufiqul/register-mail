@@ -10,18 +10,12 @@ Tech stack:
 
 #### to run
 
+
+
 - clone the repository https://github.com/Toufiqul/register-mail.git
+- add gmail api credentials in resources/credentials.json
 - build docker image
 
 ```
-docker build -t register-mail .
+docker-compose up --build
 ```
-
-- run docker container
-
-```
-docker run -p 5000:5000 -w /app -v "$(pwd):/app" register-mail
-
-```
-
-var.py file at "resources/var.py"

@@ -1,6 +1,6 @@
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError,IntegrityError
 from flask import current_app
 from db import db
 from models import UserModel
@@ -41,9 +41,7 @@ class UserList(MethodView):
         first_name=user_data.get("first_name"),
         last_name=user_data.get("last_name")
     )
-        if db.session.query(exists().where(UserModel.email==user_data["email"])):
-            abort(409, message=f"{user_data['email']} is already registered. Please Login or register with a diffrent email")
-    #409 CONFLICT: Whenever a resource conflict would be caused by fulfilling the request. Duplicate entries, such as trying to create two customers with the same information, and deleting root objects when cascade-delete is not supported are a couple of examples.
+
         isValid = validate_email(email_address=user_data["email"])
         if not isValid:
             abort(400, message="Invalid email address. Please enter a valid email address")
@@ -57,6 +55,9 @@ class UserList(MethodView):
             job = current_app.email_queue.enqueue(gmail_send_message, email_receiver,retry=Retry(max=3, interval=[10, 60*60, 24*60*60]))
 
             return {"message": f"Registration Successful! {job}"}, 200
+        except IntegrityError:
+            abort(409, message=f"{user_data['email']} is already registered. Please Login or register with a diffrent email")
+            #409 CONFLICT: Whenever a resource conflict would be caused by fulfilling the request. Duplicate entries, such as trying to create two customers with the same information, and deleting root objects when cascade-delete is not supported are a couple of examples.
         except SQLAlchemyError:
             abort(500, message="An error occurred while inserting the user.")
 

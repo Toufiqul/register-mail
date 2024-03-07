@@ -18,7 +18,7 @@ services:
       # - ./instance/sampledata.sqlite3:/app/instance/sampledata.sqlite3
       - "/home/kevo/Documents/register-mail:/app"
 
-    command: sh -c "flask run --host 0.0.0.0"
+    command: gunicorn --bind 0.0.0.0:5000 app:create_app()
 
 
   rq_workers:
@@ -29,7 +29,7 @@ services:
 
     command: sh -c "rq worker --with-scheduler -u rediss://red-cnijnk0l6cac7398rl1g:OySRwc8iMtMerm6gACQasLf2IeML9Pc3@oregon-redis.render.com:6379 emails"
 
-    working_dir: /app
+    working_dir: /home/kevo/Documents/register-mail
 
     depends_on:
       - api
